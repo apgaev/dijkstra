@@ -1,0 +1,120 @@
+import Foundation
+let graph = [
+  1: [2:7, 3:9, 6:14],
+  2: [1:7, 3:10, 4:15],
+  3: [4:11, 6:2, 1:9, 2:10],
+  6: [1:14, 5:9, 3:2],
+  5: [6:9, 4:6],
+  4: [5:6, 3:11, 2:15]
+]
+
+print("graph")
+for i in graph {
+    print(i)
+}
+
+let nodesInGraph = graph.count
+
+var visitedNodes: [Int] = []
+var nodeWithScore: [Int: Int] = [:]
+var shortestRoute: [Int: Int] = [:]
+var currentNode: Int?
+var endNode: Int
+var currentLowestScore: Int?
+let start = 1
+endNode = 5
+var ourFinalRoute: [Int] = []
+func dijxtra() {
+    while visitedNodes.count < nodesInGraph {
+        print("check current node \(currentNode!) neighbors")
+        for nextNode in graph[currentNode!]! {
+            print("next node is \(nextNode)")
+            var scoreToNextNode = 0
+            if let currentScore = nodeWithScore[currentNode!] {
+                print("current score for our node is \(currentScore)")
+                scoreToNextNode = currentScore + graph[currentNode!]![nextNode.key]!
+            } else {
+                print("IM IN ELSE WHAT IS IT")
+                scoreToNextNode = graph[currentNode!]![nextNode.key]!
+            }
+            print("score to next node is \(scoreToNextNode)")
+            print("the nodes we visited before: \(visitedNodes)")
+            print("current scores for nodes are \(nodeWithScore)")
+            if !nodeWithScore.keys.contains(nextNode.key) {
+                print("\(nextNode) is not in \(nodeWithScore)")
+                nodeWithScore[nextNode.key] = scoreToNextNode
+                print("add to this calculation of the shortest route \(shortestRoute)")
+                shortestRoute[nextNode.key] = currentNode
+                print("now this calculation looks like that: \(shortestRoute)")
+            } else if !visitedNodes.contains(nextNode.key) {
+                print("\(nextNode.key) was not visited before")
+                print("if new score \(scoreToNextNode) is less than the current one \(nodeWithScore[nextNode.key]!), we should replace the current score with a better one")
+                if nodeWithScore[nextNode.key]! > scoreToNextNode {
+                    nodeWithScore[nextNode.key]! = scoreToNextNode
+                    print("the shortest route used to be: \(shortestRoute)")
+                    shortestRoute[nextNode.key] = currentNode
+                    print("and it has turned into: \(shortestRoute)")
+                }
+            }
+            print("to sum up: from the current node \(currentNode!) to its neighbor \(nextNode) the shortest route will be with score \(scoreToNextNode)")
+        }
+        print("now we have to add the node \(currentNode!) into visited nodes array")
+        visitedNodes.append(currentNode!)
+
+        if visitedNodes.count == nodesInGraph {
+            print(visitedNodes)
+            print(nodesInGraph)
+            print("I AM HEEEEEEEERRRREEEEEEEEE")
+            print("all nodes are visited, let's define the shortest route")
+            print("it means that we should reverse the route from here: \(shortestRoute)")
+//            var ourFinalRoute: [Int] = []
+            ourFinalRoute.insert(endNode, at: 0)
+            print("now let's find out the lowest score to get to end node \(ourFinalRoute)")
+            while true {
+                print("the lowest scores for each node: \(shortestRoute)")
+                print("current endNode we work with is \(endNode)")
+                if shortestRoute[endNode] == -1 {
+                    print("the answer to the task is: \(ourFinalRoute)")
+                    break
+                }
+                endNode = shortestRoute[endNode]!
+                print("the next node on our route from our destination to start is \(endNode)")
+                ourFinalRoute.insert(endNode, at: 0)
+                print("after this node has been inserted our final route has turned into this: \(ourFinalRoute)")
+            }
+        } else {
+            print("the next thing we should do is to find next neighbor with lowest score")
+            print("our current scores for nodes look like this: \(nodeWithScore)")
+            var candidateToBeNext: Int?
+            for node in nodeWithScore {
+                print("let's ckeck that the selected node \(node) was not visited yet by looking at visited nodes array: \(visitedNodes)")
+                candidateToBeNext = node.key
+                if !visitedNodes.contains(node.key) {
+                    print("assign score of that node to lowest score for now")
+                    currentLowestScore = nodeWithScore[node.key]!
+                    break
+                }
+            }
+            for node in nodeWithScore {
+                print("\(nodeWithScore[node.key]!) should be less than \(currentLowestScore!) and be unvisited")
+                if nodeWithScore[node.key]! < currentLowestScore! && !visitedNodes.contains(node.key) {
+                    print("node \(node) has and is unvisited")
+                    currentLowestScore = nodeWithScore[node.key]
+                    print("current lowest score is \(currentLowestScore!)")
+                    candidateToBeNext = node.key
+                    print("current node is \(currentNode!)")
+                }
+            }
+            currentNode = candidateToBeNext
+            print("recursive function")
+            dijxtra()
+        }
+    }
+}
+
+nodeWithScore[start] = 0
+shortestRoute[start] = -1
+currentNode = start
+print("start with \(start)")
+dijxtra()
+print("the answer to the task is: \(ourFinalRoute)")
